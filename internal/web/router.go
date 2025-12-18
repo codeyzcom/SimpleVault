@@ -15,7 +15,9 @@ func RegisterRoutes(app *fiber.App) {
 
 	protected := app.Group("/records", AuthRequired(sm))
 	protected.Get("/", RecordsPage)
-	protected.Post("/", AddRecord)
+	protected.Get("/new", NewRecordPage())
+	protected.Post("/new", CreateRecord())
+	protected.Get("/gen-password", GeneratePasswordHandler())
 
 	app.Post("/logout", AuthRequired(sm), Logout(sm))
 }

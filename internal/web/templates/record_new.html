@@ -1,0 +1,56 @@
+<h2>Add record</h2>
+
+<form method="POST" enctype="multipart/form-data">
+  <div>
+    <input name="title" placeholder="Title" required>
+  </div>
+
+  <div style="margin-top:8px;">
+    <select name="type" id="type" onchange="switchType()">
+      <option value="note">Note</option>
+      <option value="file">File</option>
+      <option value="credential">Website access</option>
+    </select>
+  </div>
+
+  <!-- NOTE -->
+  <div id="note-block" style="margin-top:8px;">
+    <textarea name="text" rows="6" placeholder="Note text"></textarea>
+  </div>
+
+  <!-- FILE -->
+  <div id="file-block" style="margin-top:8px; display:none;">
+    <input type="file" name="file">
+  </div>
+
+  <!-- CREDENTIAL -->
+  <div id="cred-block" style="margin-top:8px; display:none;">
+    <input name="website" placeholder="Website URL"><br>
+    <input name="username" placeholder="Username"><br>
+    <input name="password" placeholder="Password">
+    <button type="button" onclick="genPass()">Generate</button><br>
+    <input name="email" placeholder="Email"><br>
+    <input name="phone" placeholder="Phone"><br>
+    <textarea name="note" rows="3" placeholder="Note"></textarea>
+  </div>
+
+  <div style="margin-top:12px;">
+    <button type="submit">Save</button>
+    <a href="/records">Cancel</a>
+  </div>
+</form>
+
+<script>
+  function switchType() {
+    const t = document.getElementById("type").value
+    document.getElementById("note-block").style.display = t === "note" ? "block" : "none"
+    document.getElementById("file-block").style.display = t === "file" ? "block" : "none"
+    document.getElementById("cred-block").style.display = t === "credential" ? "block" : "none"
+  }
+
+  function genPass() {
+    fetch("/records/gen-password")
+            .then(r => r.text())
+            .then(p => document.querySelector('input[name="password"]').value = p)
+  }
+</script>

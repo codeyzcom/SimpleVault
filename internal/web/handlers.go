@@ -5,6 +5,7 @@ import (
 	"SimpleVault/internal/storage"
 	"SimpleVault/internal/vault"
 	"github.com/gofiber/fiber/v2"
+	"io"
 )
 
 func RegisterPage() fiber.Handler {
@@ -90,10 +91,66 @@ func RecordsPage(c *fiber.Ctx) error {
 	})
 }
 
-func AddRecord(c *fiber.Ctx) error {
-	v := c.Locals("vault").(*vault.VaultService)
-	if err := v.Add(c.FormValue("title"), c.FormValue("content")); err != nil {
-		return err
+func GeneratePasswordHandler() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		p, _ := vault.GeneratePassword(16)
+		return c.SendString(p)
+	}
+}
+
+func NewRecordPage() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		return c.Render("record_new", fiber.Map{
+			"Title": "Add record",
+		})
+	}
+}
+
+func CreateRecord() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		v := c.Locals("vault").(*vault.VaultService)
+
+		title := c.FormValue("title")
+
+		switch c.FormValue("type") {
+		case "note":
+			return handleErr(c, v.AddNote(title, c.FormValue("text")))
+		case "file":
+			fh, err := c.FormFile("file")
+			if err != nil {
+				return err
+			}
+			f, err := fh.Open()
+			defer f.Close()
+			if err != nil {
+				return err
+			}
+			data, err := io.ReadAll(f)
+			if err != nil {
+				return err
+			}
+			return handleErr(c, v.AddFile(title, fh.Filename, data))
+		case "credential":
+			return handleErr(c, v.AddCredential(
+				title,
+				vault.CredentialData{
+
+					Website:  c.FormValue("website"),
+					Username: c.FormValue("username"),
+					Password: c.FormValue("password"),
+					Email:    c.FormValue("email"),
+					Phone:    c.FormValue("phone"),
+					Note:     c.FormValue("note"),
+				}))
+		default:
+			return fiber.NewError(400, "unknown record type")
+		}
+	}
+}
+
+func handleErr(c *fiber.Ctx, err error) error {
+	if err != nil {
+		return fiber.NewError(400, err.Error())
 	}
 	return c.Redirect("/records")
 }

@@ -93,19 +93,6 @@ func (s *VaultService) List() []Record {
 	return s.vault.Records
 }
 
-func (s *VaultService) Add(title, content string) error {
-	r := Record{
-		ID:        uuid.NewString(),
-		Type:      "note",
-		Title:     title,
-		Content:   content,
-		CreatedAt: time.Now(),
-	}
-
-	s.vault.Records = append(s.vault.Records, r)
-	return s.save()
-}
-
 func (s *VaultService) save() error {
 	raw, err := json.Marshal(s.vault)
 	if err != nil {
@@ -130,4 +117,71 @@ func (s VaultService) Wipe() {
 	s.key = nil
 	s.vault = nil
 	s.meta = nil
+}
+
+func (s *VaultService) AddNote(title, text string) error {
+	if title == "" || text == "" {
+		return errors.New("title and text are required")
+	}
+
+	r := Record{
+		ID:        uuid.NewString(),
+		Title:     title,
+		Type:      RecordNote,
+		CreatedAt: time.Now(),
+		Note: &NoteData{
+			Text: text,
+		},
+	}
+
+	s.vault.Records = append(s.vault.Records, r)
+	return s.save()
+}
+
+func (s *VaultService) AddFile(title, filename string, data []byte) error {
+	if title == "" || filename == "" || len(data) == 0 {
+		return errors.New("invalid file data")
+	}
+
+	if len(data) > 8*1024*1024 {
+		return errors.New("file too large (max 8MB)")
+	}
+
+	r := Record{
+		ID:        uuid.NewString(),
+		Title:     title,
+		Type:      RecordFile,
+		CreatedAt: time.Now(),
+		File: &FileData{
+			Filename: filename,
+			Data:     data,
+		},
+	}
+
+	s.vault.Records = append(s.vault.Records, r)
+	return s.save()
+}
+
+func (s *VaultService) AddCredential(title string, c CredentialData) error {
+	if c.Password == "" {
+		return errors.New("title and password are required")
+	}
+
+	r := Record{
+		ID:        uuid.NewString(),
+		Title:     title,
+		Type:      RecordCredential,
+		CreatedAt: time.Now(),
+		Credential: &CredentialData{
+			Website:  c.Website,
+			Username: c.Username,
+			Password: c.Password,
+			Email:    c.Email,
+			Phone:    c.Phone,
+			Note:     c.Note,
+		},
+	}
+
+	s.vault.Records = append(s.vault.Records, r)
+	return s.save()
 }
