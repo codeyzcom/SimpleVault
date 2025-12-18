@@ -7,19 +7,21 @@
 <body>
 
 <header>
-    <div class="header-left">
-        <strong>SimpleVault</strong>
+    <div class="header-inner">
+        <div class="header-left">
+            <strong>SimpleVault</strong>
 
-        <nav class="nav">
-            <a href="/records/new">➕ New</a>
+            <nav class="nav">
+                <a href="/records/new">➕ New</a>
+            </nav>
+        </div>
+
+        <form method="POST" action="/logout" class="header-actions">
             <a href="/backup">⬇ Backup</a>
             <a href="/restore">⬆ Restore</a>
-        </nav>
+            <button type="submit">Logout</button>
+        </form>
     </div>
-
-    <form method="POST" action="/logout">
-        <button type="submit">Logout</button>
-    </form>
 </header>
 
 <main>
@@ -35,18 +37,30 @@
     }
 
     header {
-        padding: 12px 20px;
         background: #ffffff;
         border-bottom: 1px solid #ddd;
+    }
+
+    /* inner container = same width as main */
+    .header-inner {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
 
+
     main {
         padding: 20px;
         max-width: 900px;
         margin: 0 auto;
+    }
+
+    main h2:first-child {
+        margin-top: 0;
     }
 
     a {
@@ -57,14 +71,6 @@
         margin-right: 12px;
     }
 
-    header {
-        padding: 12px 20px;
-        background: #ffffff;
-        border-bottom: 1px solid #ddd;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
 
     .header-left {
         display: flex;
@@ -153,6 +159,7 @@
     .record-actions .danger {
         color: #b00020;
     }
+
     .record-view {
         max-width: 700px;
         background: #fff;
@@ -218,6 +225,79 @@
     .record-actions .danger {
         color: #b00020;
     }
+
+    /* ===== Add record – compact internal style ===== */
+
+    .add-record {
+        max-width: 520px;
+    }
+
+    .add-record form {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 12px;
+    }
+
+    /* spacing between rows */
+    .add-record form > div {
+        margin-bottom: 8px;
+    }
+
+    /* inputs – compact */
+    .add-record input,
+    .add-record select,
+    .add-record textarea {
+        width: 100%;
+        padding: 6px 0;
+        margin-top: 6px;
+        font-size: 0.9em;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+
+    /* textarea size FIX */
+    .add-record textarea {
+        resize: vertical;
+    }
+
+    /* blocks – no fat padding */
+    .add-record #note-block,
+    .add-record #file-block,
+    .add-record #cred-block {
+        padding: 8px;
+        background: #f6f7f8;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+    }
+
+    /* credential block – tight layout */
+    .add-record #cred-block {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    /* generate password – small util button */
+    .add-record #cred-block button {
+        padding: 3px 6px;
+        font-size: 0.8em;
+    }
+
+    /* actions */
+    .add-record form > div:last-child {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    /* cancel link */
+    .add-record a {
+        font-size: 0.9em;
+        color: #333;
+    }
+
 </style>
 
 
