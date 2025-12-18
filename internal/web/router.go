@@ -19,7 +19,7 @@ func RegisterRoutes(app *fiber.App) {
 	protected.Post("/new", CreateRecord())
 	protected.Get("/search", SearchRecords())
 	protected.Get("/gen-password", GeneratePasswordHandler())
-	protected.Get("/:id", ViewRecord())
+	protected.Get("/:id", ViewRecordPage())
 	protected.Get("/:id/download", DownloadFile())
 	protected.Get("/:id/delete", DeleteRecordPage())
 	protected.Post("/:id/delete", DeleteRecord())

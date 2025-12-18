@@ -1,16 +1,7 @@
 <h2>Records</h2>
 
-<!-- TOP ACTIONS -->
-<div style="margin-bottom: 12px;">
-    <a href="/records/new">➕ New entry</a>
-    |
-    <a href="/backup">⬇ Backup vault</a>
-    |
-    <a href="/restore">⬆ Restore vault</a>
-</div>
-
 <!-- SEARCH -->
-<form method="GET" action="/records/search" style="margin-bottom: 12px;">
+<form method="GET" action="/records/search" class="search">
     <input
             type="text"
             name="q"
@@ -18,47 +9,42 @@
             value="{{ .Query }}"
     >
     <button type="submit">Search</button>
+
     {{ if .Query }}
-    <a href="/records">Clear</a>
+    <a href="/records" class="clear">Clear</a>
     {{ end }}
 </form>
 
 <!-- RECORDS LIST -->
-<ul>
+<div class="records">
     {{ range .Records }}
-    <li style="margin-bottom: 6px;">
-        <!-- TYPE ICON -->
-        {{ if eq .Type "note" }}📝{{ end }}
-        {{ if eq .Type "file" }}📁{{ end }}
-        {{ if eq .Type "credential" }}🔐{{ end }}
+    <div class="record">
+        <div class="record-main">
+            <span class="icon">
+                {{ if eq .Type "note" }}📝{{ end }}
+                {{ if eq .Type "file" }}📁{{ end }}
+                {{ if eq .Type "credential" }}🔐{{ end }}
+            </span>
 
-        <!-- TITLE -->
-        <strong>{{ .Title }}</strong>
+            <div class="record-info">
+                <div class="record-title">{{ .Title }}</div>
+                <div class="record-meta">
+                    {{ .CreatedAt.Format "2006-01-02 15:04" }}
+                </div>
+            </div>
+        </div>
 
-        <!-- META -->
-        <small>
-            ({{ .CreatedAt.Format "2006-01-02 15:04" }})
-        </small>
+        <div class="record-actions">
+            <a href="/records/{{ .ID }}">View</a>
 
-        <!-- ACTIONS -->
-        [
-        <a href="/records/{{ .ID }}">view</a>
+            {{ if eq .Type "file" }}
+            <a href="/records/{{ .ID }}/download">Download</a>
+            {{ end }}
 
-        {{ if eq .Type "file" }}
-        | <a href="/records/{{ .ID }}/download">download</a>
-        {{ end }}
-
-        | <a href="/records/{{ .ID }}/delete">delete</a>
-        ]
-    </li>
+            <a href="/records/{{ .ID }}/delete" class="danger">Delete</a>
+        </div>
+    </div>
     {{ else }}
-    <li>No records</li>
+    <p>No records</p>
     {{ end }}
-</ul>
-
-<hr>
-
-<!-- LOGOUT -->
-<form method="POST" action="/logout">
-    <button>Logout</button>
-</form>
+</div>

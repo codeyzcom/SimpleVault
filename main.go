@@ -8,8 +8,7 @@ import (
 
 func main() {
 	app := fiber.New(fiber.Config{
-		Views:       web.NewTemplateEngine(),
-		ViewsLayout: "layouts/main",
+		Views: web.NewTemplateEngine(),
 	})
 
 	web.RegisterRoutes(app)

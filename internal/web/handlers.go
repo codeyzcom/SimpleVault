@@ -12,7 +12,7 @@ func RegisterPage() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		return c.Render("register", fiber.Map{
 			"Title": "Register",
-		})
+		}, "layouts/public")
 	}
 }
 
@@ -44,7 +44,10 @@ func LoginPage(sm *SessionManager) fiber.Handler {
 				return c.Redirect("/records")
 			}
 		}
-		return c.Render("login", nil)
+		return c.Render("login", fiber.Map{
+			"Title": "Login",
+			"Error": "Invalid password",
+		}, "layouts/public")
 	}
 }
 
@@ -88,7 +91,7 @@ func RecordsPage(c *fiber.Ctx) error {
 	v := c.Locals("vault").(*vault.VaultService)
 	return c.Render("records", fiber.Map{
 		"Records": v.List(),
-	})
+	}, "layouts/private")
 }
 
 func GeneratePasswordHandler() fiber.Handler {
@@ -102,7 +105,7 @@ func NewRecordPage() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		return c.Render("record_new", fiber.Map{
 			"Title": "Add record",
-		})
+		}, "layouts/private")
 	}
 }
 
@@ -148,7 +151,7 @@ func CreateRecord() fiber.Handler {
 	}
 }
 
-func ViewRecord() fiber.Handler {
+func ViewRecordPage() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		v := c.Locals("vault").(*vault.VaultService)
 		r, err := v.GetRecord(c.Params("id"))
@@ -159,7 +162,7 @@ func ViewRecord() fiber.Handler {
 		return c.Render("record_view", fiber.Map{
 			"Title":  "View record",
 			"Record": r,
-		})
+		}, "layouts/private")
 	}
 }
 
@@ -179,7 +182,7 @@ func DeleteRecordPage() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		return c.Render("record_delete", fiber.Map{
 			"ID": c.Params("id"),
-		})
+		}, "layouts/private")
 	}
 }
 
@@ -200,7 +203,7 @@ func SearchRecords() fiber.Handler {
 		return c.Render("records", fiber.Map{
 			"Records": v.Search(q),
 			"Query":   q,
-		})
+		}, "layouts/private")
 	}
 }
 
@@ -218,7 +221,9 @@ func BackupVault() fiber.Handler {
 
 func RestoreVaultPage() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		return c.Render("restore", fiber.Map{"Title": "Restore"})
+		return c.Render(
+			"restore", fiber.Map{"Title": "Restore"},
+			"layouts/private")
 	}
 }
 

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .Title }}</title>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <strong>SimpleVault</strong>
+
+        <nav class="nav">
+            <a href="/records/new">➕ New</a>
+            <a href="/backup">⬇ Backup</a>
+            <a href="/restore">⬆ Restore</a>
+        </nav>
+    </div>
+
+    <form method="POST" action="/logout">
+        <button type="submit">Logout</button>
+    </form>
+</header>
+
+<main>
+    {{ embed }}
+</main>
+
+
+<style>
+    body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #fafafa;
+    }
+
+    header {
+        padding: 12px 20px;
+        background: #ffffff;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    main {
+        padding: 20px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    .actions a {
+        margin-right: 12px;
+    }
+
+    header {
+        padding: 12px 20px;
+        background: #ffffff;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .nav a {
+        margin-right: 12px;
+        color: #333;
+        text-decoration: none;
+        font-size: 0.95em;
+    }
+
+    .nav a:hover {
+        text-decoration: underline;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    .search {
+        margin-bottom: 16px;
+    }
+
+    .search input {
+        padding: 6px;
+        margin-right: 6px;
+    }
+
+    .search button {
+        padding: 6px 10px;
+    }
+
+    .search .clear {
+        margin-left: 8px;
+        font-size: 0.9em;
+    }
+
+    .records {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .record {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .record-main {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .icon {
+        font-size: 1.2em;
+    }
+
+    .record-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .record-title {
+        font-weight: 600;
+    }
+
+    .record-meta {
+        font-size: 0.85em;
+        color: #666;
+    }
+
+    .record-actions a {
+        margin-left: 10px;
+        font-size: 0.9em;
+    }
+
+    .record-actions .danger {
+        color: #b00020;
+    }
+    .record-view {
+        max-width: 700px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 16px;
+    }
+
+    .record-header {
+        margin-bottom: 16px;
+    }
+
+    .record-title {
+        font-size: 1.2em;
+        font-weight: 600;
+    }
+
+    .record-meta {
+        font-size: 0.85em;
+        color: #666;
+    }
+
+    .record-section {
+        margin-top: 16px;
+    }
+
+    .record-section h4 {
+        margin-bottom: 8px;
+        font-size: 1em;
+    }
+
+    .note-text {
+        background: #f6f7f8;
+        padding: 10px;
+        border-radius: 4px;
+        white-space: pre-wrap;
+    }
+
+    .field {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 6px;
+    }
+
+    .label {
+        min-width: 90px;
+        font-size: 0.85em;
+        color: #666;
+    }
+
+    .secret {
+        background: #f6f7f8;
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
+
+    .record-actions {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .record-actions .danger {
+        color: #b00020;
+    }
+</style>
+
+
+</body>
+</html>
