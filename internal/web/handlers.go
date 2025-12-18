@@ -148,6 +148,97 @@ func CreateRecord() fiber.Handler {
 	}
 }
 
+func ViewRecord() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		v := c.Locals("vault").(*vault.VaultService)
+		r, err := v.GetRecord(c.Params("id"))
+		if err != nil {
+			return fiber.ErrNotFound
+		}
+
+		return c.Render("record_view", fiber.Map{
+			"Title":  "View record",
+			"Record": r,
+		})
+	}
+}
+
+func DownloadFile() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		v := c.Locals("vault").(*vault.VaultService)
+		r, err := v.GetRecord(c.Params("id"))
+		if err != nil || r.Type != vault.RecordFile {
+			return fiber.ErrNotFound
+		}
+		c.Set("Content-Disposition", "attachment; filename="+r.File.Filename)
+		return c.Send(r.File.Data)
+	}
+}
+
+func DeleteRecordPage() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		return c.Render("record_delete", fiber.Map{
+			"ID": c.Params("id"),
+		})
+	}
+}
+
+func DeleteRecord() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		v := c.Locals("vault").(*vault.VaultService)
+		if err := v.DeleteRecord(c.Params("id")); err != nil {
+			return err
+		}
+		return c.Redirect("/records")
+	}
+}
+
+func SearchRecords() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		v := c.Locals("vault").(*vault.VaultService)
+		q := c.Query("q")
+		return c.Render("records", fiber.Map{
+			"Records": v.Search(q),
+			"Query":   q,
+		})
+	}
+}
+
+func BackupVault() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		v := c.Locals("vault").(*vault.VaultService)
+		data, err := v.Export()
+		if err != nil {
+			return err
+		}
+		c.Set("Content-Disposition", "attachment; filename=vault.dat")
+		return c.Send(data)
+	}
+}
+
+func RestoreVaultPage() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		return c.Render("restore", fiber.Map{"Title": "Restore"})
+	}
+}
+
+func RestoreVault() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		v := c.Locals("vault").(*vault.VaultService)
+		fh, _ := c.FormFile("vault")
+		f, _ := fh.Open()
+		defer f.Close()
+
+		data, _ := io.ReadAll(f)
+		if err := v.Import(data); err != nil {
+			return c.Render("restore", fiber.Map{
+				"Error": err.Error(),
+			})
+		}
+		return c.Redirect("/records")
+	}
+}
+
 func handleErr(c *fiber.Ctx, err error) error {
 	if err != nil {
 		return fiber.NewError(400, err.Error())

@@ -1,0 +1,22 @@
+<h2>Record</h2>
+
+<h3>{{ .Record.Title }}</h3>
+{{ if .Record.Note }}
+<pre>{{ .Record.Note.Text }}</pre>
+{{ end }}
+
+{{ if .Record.Credential }}
+<p>{{ .Record.Credential.Website }}</p>
+<p>{{ .Record.Credential.Username }}</p>
+<p>{{ .Record.Credential.Password }}</p>
+{{ end }}
+
+{{ if .Record.File }}
+<p>File: {{ .Record.File.Filename }}</p>
+<a href="/records/{{ .Record.ID }}/download">Download</a>
+{{ end }}
+
+<p>
+    <a href="/records/{{ .Record.ID }}/delete">Delete</a> |
+    <a href="/records">Back</a>
+</p>

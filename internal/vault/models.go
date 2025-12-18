@@ -16,7 +16,7 @@ type Meta struct {
 }
 
 type Vault struct {
-	Records []Record `json:"records"`
+	Records []*Record `json:"records"`
 }
 
 type Record struct {

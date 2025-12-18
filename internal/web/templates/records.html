@@ -1,14 +1,64 @@
 <h2>Records</h2>
 
-<a href="/records/new">New entry</a>
+<!-- TOP ACTIONS -->
+<div style="margin-bottom: 12px;">
+    <a href="/records/new">➕ New entry</a>
+    |
+    <a href="/backup">⬇ Backup vault</a>
+    |
+    <a href="/restore">⬆ Restore vault</a>
+</div>
+
+<!-- SEARCH -->
+<form method="GET" action="/records/search" style="margin-bottom: 12px;">
+    <input
+            type="text"
+            name="q"
+            placeholder="Search..."
+            value="{{ .Query }}"
+    >
+    <button type="submit">Search</button>
+    {{ if .Query }}
+    <a href="/records">Clear</a>
+    {{ end }}
+</form>
+
+<!-- RECORDS LIST -->
 <ul>
     {{ range .Records }}
-    <li>{{ .Title }}</li>
+    <li style="margin-bottom: 6px;">
+        <!-- TYPE ICON -->
+        {{ if eq .Type "note" }}📝{{ end }}
+        {{ if eq .Type "file" }}📁{{ end }}
+        {{ if eq .Type "credential" }}🔐{{ end }}
+
+        <!-- TITLE -->
+        <strong>{{ .Title }}</strong>
+
+        <!-- META -->
+        <small>
+            ({{ .CreatedAt.Format "2006-01-02 15:04" }})
+        </small>
+
+        <!-- ACTIONS -->
+        [
+        <a href="/records/{{ .ID }}">view</a>
+
+        {{ if eq .Type "file" }}
+        | <a href="/records/{{ .ID }}/download">download</a>
+        {{ end }}
+
+        | <a href="/records/{{ .ID }}/delete">delete</a>
+        ]
+    </li>
     {{ else }}
     <li>No records</li>
     {{ end }}
 </ul>
 
+<hr>
+
+<!-- LOGOUT -->
 <form method="POST" action="/logout">
     <button>Logout</button>
 </form>

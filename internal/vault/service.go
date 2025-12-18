@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
+	"strings"
 	"time"
 )
 
@@ -34,7 +35,7 @@ func (s *VaultService) Init(password string) error {
 		Verifier: sha(key),
 	}
 
-	v := &Vault{Records: []Record{}}
+	v := &Vault{Records: []*Record{}}
 
 	raw, _ := json.Marshal(v)
 	enc, _ := s.crypto.Encrypt(key, raw)
@@ -89,7 +90,7 @@ func (s *VaultService) Login(password string) error {
 	return nil
 }
 
-func (s *VaultService) List() []Record {
+func (s *VaultService) List() []*Record {
 	return s.vault.Records
 }
 
@@ -124,7 +125,7 @@ func (s *VaultService) AddNote(title, text string) error {
 		return errors.New("title and text are required")
 	}
 
-	r := Record{
+	r := &Record{
 		ID:        uuid.NewString(),
 		Title:     title,
 		Type:      RecordNote,
@@ -147,7 +148,7 @@ func (s *VaultService) AddFile(title, filename string, data []byte) error {
 		return errors.New("file too large (max 8MB)")
 	}
 
-	r := Record{
+	r := &Record{
 		ID:        uuid.NewString(),
 		Title:     title,
 		Type:      RecordFile,
@@ -167,7 +168,7 @@ func (s *VaultService) AddCredential(title string, c CredentialData) error {
 		return errors.New("title and password are required")
 	}
 
-	r := Record{
+	r := &Record{
 		ID:        uuid.NewString(),
 		Title:     title,
 		Type:      RecordCredential,
@@ -184,4 +185,62 @@ func (s *VaultService) AddCredential(title string, c CredentialData) error {
 
 	s.vault.Records = append(s.vault.Records, r)
 	return s.save()
+}
+
+func (s *VaultService) GetRecord(id string) (*Record, error) {
+	for _, r := range s.vault.Records {
+		if r.ID == id {
+			return r, nil
+		}
+	}
+	return nil, errors.New("record not found")
+}
+
+func (s *VaultService) DeleteRecord(id string) error {
+	for i, r := range s.vault.Records {
+		if r.ID == id {
+			s.vault.Records = append(
+				s.vault.Records[:i],
+				s.vault.Records[i+1:]...,
+			)
+			return s.save()
+		}
+	}
+	return errors.New("record not found")
+}
+
+func (s VaultService) Search(query string) []*Record {
+	q := strings.ToLower(query)
+	var res []*Record
+
+	for _, r := range s.vault.Records {
+		if strings.Contains(strings.ToLower(r.Title), q) {
+			res = append(res, r)
+			continue
+		}
+		switch r.Type {
+		case RecordNote:
+			if strings.Contains(strings.ToLower(r.Note.Text), q) {
+				res = append(res, r)
+			}
+		case RecordCredential:
+			if strings.Contains(strings.ToLower(r.Credential.Website), q) {
+				res = append(res, r)
+
+			}
+		}
+	}
+	return res
+}
+
+func (s *VaultService) Export() ([]byte, error) {
+	return s.storage.Read("vault.dat")
+}
+
+func (s *VaultService) Import(data []byte) error {
+	_, err := s.crypto.Decrypt(s.key, data)
+	if err != nil {
+		return errors.New("invalid vault file or wrong password")
+	}
+	return s.storage.Write("vault.dat", data)
 }
