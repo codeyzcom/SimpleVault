@@ -24,7 +24,3 @@ The project is designed as a single-user or small multi-user personal vault, not
 
 ---
 
-## Architecture Overview
-
-### High-level design
-
