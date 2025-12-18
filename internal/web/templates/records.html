@@ -1,0 +1,13 @@
+<h2>Records</h2>
+
+<ul>
+    {{ range .Records }}
+    <li>{{ .Title }}</li>
+    {{ else }}
+    <li>No records</li>
+    {{ end }}
+</ul>
+
+<form method="POST" action="/logout">
+    <button>Logout</button>
+</form>
