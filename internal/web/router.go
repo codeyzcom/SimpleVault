@@ -1,11 +1,12 @@
 package web
 
 import (
+	"SimpleVault/internal/config"
 	"github.com/gofiber/fiber/v2"
 )
 
-func RegisterRoutes(app *fiber.App) {
-	sm := NewSessionManager()
+func RegisterRoutes(app *fiber.App, cfg *config.Config) {
+	sm := NewSessionManager(cfg.SessionTTL)
 
 	app.Get("/register", RegisterPage())
 	app.Post("/register", Register())

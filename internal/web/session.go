@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-const SessionTTL = 15 * time.Minute
-
 type Session struct {
 	Vault     *vault.VaultService
 	ExpiresAt time.Time
@@ -20,12 +18,15 @@ type SessionManager struct {
 	sessions map[string]*Session
 
 	userIndex map[string]string
+
+	ttl time.Duration
 }
 
-func NewSessionManager() *SessionManager {
+func NewSessionManager(ttl time.Duration) *SessionManager {
 	return &SessionManager{
 		sessions:  make(map[string]*Session),
 		userIndex: make(map[string]string),
+		ttl:       ttl,
 	}
 }
 
@@ -43,7 +44,7 @@ func (sm *SessionManager) Create(userID string, v *vault.VaultService) string {
 	id := uuid.NewString()
 	sm.sessions[id] = &Session{
 		Vault:     v,
-		ExpiresAt: time.Now().Add(SessionTTL),
+		ExpiresAt: time.Now().Add(sm.ttl),
 		UserID:    userID,
 	}
 	return id
@@ -65,7 +66,7 @@ func (sm *SessionManager) Get(id string) (*vault.VaultService, bool) {
 		return nil, false
 	}
 
-	s.ExpiresAt = time.Now().Add(SessionTTL)
+	s.ExpiresAt = time.Now().Add(sm.ttl)
 
 	return s.Vault, true
 }
