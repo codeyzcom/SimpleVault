@@ -1,0 +1,20 @@
+package app
+
+import (
+	"SimpleVault/internal/web"
+	"github.com/gofiber/fiber/v2"
+	"log/slog"
+)
+
+func RunApp() {
+	app := fiber.New(fiber.Config{
+		Views: web.NewTemplateEngine(),
+	})
+
+	web.RegisterRoutes(app)
+
+	if err := app.Listen(":7879"); err != nil {
+		slog.Error("Start application with error", "detail", err.Error())
+	}
+
+}
