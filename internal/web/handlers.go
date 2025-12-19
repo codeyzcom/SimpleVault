@@ -3,9 +3,11 @@ package web
 import (
 	"SimpleVault/internal/crypto"
 	"SimpleVault/internal/storage"
+	"SimpleVault/internal/utils"
 	"SimpleVault/internal/vault"
 	"github.com/gofiber/fiber/v2"
 	"io"
+	"path/filepath"
 )
 
 func RegisterPage() fiber.Handler {
@@ -16,20 +18,34 @@ func RegisterPage() fiber.Handler {
 	}
 }
 
-func Register() fiber.Handler {
+func Register(storePath string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
+		path := filepath.Join(storePath, username)
+		exists, err := utils.IsDirExist(path)
+		if err != nil {
+			return c.Render("register", fiber.Map{
+				"Error": err.Error(),
+			}, "layouts/public")
+		}
+
+		if exists {
+			return c.Render("register", fiber.Map{
+				"Error": "User already exists!",
+			}, "layouts/public")
+		}
+
 		v := vault.NewVaultService(
 			crypto.NewCryptoService(),
-			storage.NewFileStorage("data/"+username),
+			storage.NewFileStorage(path),
 		)
 
 		if err := v.Init(password); err != nil {
 			return c.Render("register", fiber.Map{
 				"Error": err.Error(),
-			})
+			}, "layouts/public")
 		}
 
 		return c.Redirect("/login")
@@ -46,19 +62,26 @@ func LoginPage(sm *SessionManager) fiber.Handler {
 		}
 		return c.Render("login", fiber.Map{
 			"Title": "Login",
-			"Error": "Invalid password",
 		}, "layouts/public")
 	}
 }
 
-func Login(sm *SessionManager) fiber.Handler {
+func Login(sm *SessionManager, storePath string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
+		path := filepath.Join(storePath, username)
+		exists, err := utils.IsDirExist(path)
+		if err != nil || !exists {
+			return c.Render("login", fiber.Map{
+				"Error": "Invalid credentials",
+			}, "layouts/public")
+		}
+
 		v := vault.NewVaultService(
 			crypto.NewCryptoService(),
-			storage.NewFileStorage("data/"+username),
+			storage.NewFileStorage(path),
 		)
 
 		if err := v.Login(password); err != nil {

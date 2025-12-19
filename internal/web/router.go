@@ -9,10 +9,10 @@ func RegisterRoutes(app *fiber.App, cfg *config.Config) {
 	sm := NewSessionManager(cfg.SessionTTL)
 
 	app.Get("/register", RegisterPage())
-	app.Post("/register", Register())
+	app.Post("/register", Register(cfg.DataStore))
 
 	app.Get("/login", LoginPage(sm))
-	app.Post("/login", Login(sm))
+	app.Post("/login", Login(sm, cfg.DataStore))
 
 	protected := app.Group("/records", AuthRequired(sm))
 	protected.Get("/", RecordsPage)
