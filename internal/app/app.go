@@ -9,8 +9,13 @@ import (
 
 func RunApp() {
 	cfg := config.LoadConfig()
+
+	tempEngine, err := web.NewTemplateEngine()
+	if err != nil {
+		panic(err)
+	}
 	app := fiber.New(fiber.Config{
-		Views: web.NewTemplateEngine(),
+		Views: tempEngine,
 	})
 
 	web.RegisterRoutes(app, cfg)
