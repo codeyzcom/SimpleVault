@@ -64,7 +64,7 @@ func Login(sm *SessionManager) fiber.Handler {
 		if err := v.Login(password); err != nil {
 			return c.Render("login", fiber.Map{
 				"Error": "Invalid credentials",
-			}, "layouts/private")
+			}, "layouts/public")
 		}
 		sid := sm.Create(username, v)
 
