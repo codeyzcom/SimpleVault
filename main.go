@@ -1,21 +1,12 @@
 package main
 
 import (
-	"SimpleVault/internal/web"
-	"github.com/gofiber/fiber/v2"
+	"SimpleVault/internal/app"
 	"log/slog"
 )
 
 func main() {
-	app := fiber.New(fiber.Config{
-		Views: web.NewTemplateEngine(),
-	})
-
-	web.RegisterRoutes(app)
-
-	if err := app.Listen(":7879"); err != nil {
-		slog.Error("Start application with error", "detail", err.Error())
-	}
-
-	slog.Info("Application shutdown...")
+	slog.Info(">>> Application starting")
+	app.RunApp()
+	slog.Info(">> Application shutdown")
 }
