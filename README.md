@@ -24,3 +24,22 @@ The project is designed as a single-user or small multi-user personal vault, not
 
 ---
 
+## Configuration
+
+SimpleVault is configured via command-line flags at application startup.  
+No configuration files are required — all settings are passed explicitly, keeping the setup simple and transparent.
+
+### Available options
+
+| Flag | Type | Default     | Description |
+|------|------|-------------|-------------|
+| `-host` | `string` | `localhost` | HTTP server host |
+| `-port` | `int` | `7879`      | HTTP server port |
+| `-session_ttl` | `duration` | `15m`       | Session lifetime (e.g. `10s`, `5m`, `1h`) |
+| `-data_store` | `string` | `data/`     |  path to store vaults
+
+
+### Notes
+- session_ttl uses Go time.Duration format.
+- When the session expires, the user is automatically logged out.
+- Configuration is parsed once at startup and remains immutable during runtime.
