@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -68,4 +69,57 @@ func TestCryptoService_DeriveKey_DifferentSalt(t *testing.T) {
 		bytes.Equal(key1, key2),
 		"different salts must produce different keys",
 	)
+}
+
+func TestCryptoService_VerifyKey(t *testing.T) {
+	svc := &CryptoService{}
+
+	t.Run("valid key and verifier", func(t *testing.T) {
+		key := []byte("super-secret-password")
+		hash := sha256.Sum256(key)
+
+		ok := svc.VerifyKey(key, hash[:])
+
+		assert.True(t, ok)
+	})
+
+	t.Run("invalid key", func(t *testing.T) {
+		key := []byte("super-secret-password")
+		wrongKey := []byte("another-password")
+
+		hash := sha256.Sum256(key)
+
+		ok := svc.VerifyKey(wrongKey, hash[:])
+
+		assert.False(t, ok)
+	})
+
+	t.Run("empty key", func(t *testing.T) {
+		key := []byte{}
+		hash := sha256.Sum256(key)
+
+		ok := svc.VerifyKey([]byte{}, hash[:])
+
+		assert.True(t, ok)
+	})
+
+	t.Run("empty verifier", func(t *testing.T) {
+		key := []byte("secret")
+
+		ok := svc.VerifyKey(key, []byte{})
+
+		assert.False(t, ok)
+	})
+
+	t.Run("corrupted verifier", func(t *testing.T) {
+		key := []byte("secret")
+		hash := sha256.Sum256(key)
+
+		verifier := hash[:]
+		verifier[0] ^= 0xff // портим хеш
+
+		ok := svc.VerifyKey(key, verifier)
+
+		assert.False(t, ok)
+	})
 }
