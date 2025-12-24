@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -116,10 +117,28 @@ func TestCryptoService_VerifyKey(t *testing.T) {
 		hash := sha256.Sum256(key)
 
 		verifier := hash[:]
-		verifier[0] ^= 0xff // портим хеш
+		verifier[0] ^= 0xff
 
 		ok := svc.VerifyKey(key, verifier)
 
 		assert.False(t, ok)
 	})
+}
+
+func TestEncryptDecrypt_RoundTrip(t *testing.T) {
+	srv := NewCryptoService()
+
+	key := make([]byte, 32)
+	_, _ = rand.Read(key)
+
+	plaintext := []byte("top secret payload")
+
+	encrypted, err := srv.Encrypt(key, plaintext)
+	require.NoError(t, err)
+	require.NotEmpty(t, encrypted)
+
+	decrypted, err := srv.Decrypt(key, encrypted)
+	require.NoError(t, err)
+
+	assert.Equal(t, plaintext, decrypted)
 }
