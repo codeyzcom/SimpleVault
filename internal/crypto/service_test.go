@@ -142,3 +142,11 @@ func TestEncryptDecrypt_RoundTrip(t *testing.T) {
 
 	assert.Equal(t, plaintext, decrypted)
 }
+
+func TestEncrypt_InvalidKey(t *testing.T) {
+	srv := NewCryptoService()
+
+	_, err := srv.Encrypt([]byte("short-key"), []byte("data"))
+
+	assert.Error(t, err)
+}
