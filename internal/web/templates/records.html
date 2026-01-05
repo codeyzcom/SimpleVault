@@ -36,10 +36,11 @@
 
         <div class="record-actions">
             <a href="/records/{{ .ID }}">View</a>
-
             {{ if eq .Type "file" }}
             <a href="/records/{{ .ID }}/download">Download</a>
             {{ end }}
+
+            <a href="/records/{{ .ID }}/edit">Edit</a>
 
             <a href="/records/{{ .ID }}/delete" class="danger">Delete</a>
         </div>

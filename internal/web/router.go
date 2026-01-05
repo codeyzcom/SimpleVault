@@ -8,6 +8,10 @@ import (
 func RegisterRoutes(app *fiber.App, cfg *config.Config) {
 	sm := NewSessionManager(cfg.SessionTTL)
 
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Redirect("/login", fiber.StatusPermanentRedirect)
+	})
+
 	app.Get("/register", RegisterPage())
 	app.Post("/register", Register(cfg.DataStore))
 
@@ -21,6 +25,8 @@ func RegisterRoutes(app *fiber.App, cfg *config.Config) {
 	protected.Get("/search", SearchRecords())
 	protected.Get("/gen-password", GeneratePasswordHandler())
 	protected.Get("/:id", ViewRecordPage())
+	protected.Get("/:id/edit", EditRecordPage())
+	protected.Post("/:id/edit", EditRecord())
 	protected.Get("/:id/download", DownloadFile())
 	protected.Get("/:id/delete", DeleteRecordPage())
 	protected.Post("/:id/delete", DeleteRecord())
