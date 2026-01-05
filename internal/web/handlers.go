@@ -5,6 +5,7 @@ import (
 	"SimpleVault/internal/storage"
 	"SimpleVault/internal/utils"
 	"SimpleVault/internal/vault"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"io"
 	"path/filepath"
@@ -136,38 +137,22 @@ func CreateRecord() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		v := c.Locals("vault").(*vault.VaultService)
 
-		title := c.FormValue("title")
+		rt := vault.RecordType(c.FormValue("type"))
+		in, err := parseRecordForm(c, rt)
+		if err != nil {
+			return err
+		}
 
-		switch c.FormValue("type") {
+		switch in.Type {
 		case "note":
-			return handleErr(c, v.AddNote(title, c.FormValue("text")))
-		case "file":
-			fh, err := c.FormFile("file")
-			if err != nil {
-				return err
-			}
-			f, err := fh.Open()
-			defer f.Close()
-			if err != nil {
-				return err
-			}
-			data, err := io.ReadAll(f)
-			if err != nil {
-				return err
-			}
-			return handleErr(c, v.AddFile(title, fh.Filename, data))
+			return handleErr(c, v.AddNote(in.Title, in.Note.Text))
 		case "credential":
-			return handleErr(c, v.AddCredential(
-				title,
-				vault.CredentialData{
-
-					Website:  c.FormValue("website"),
-					Username: c.FormValue("username"),
-					Password: c.FormValue("password"),
-					Email:    c.FormValue("email"),
-					Phone:    c.FormValue("phone"),
-					Note:     c.FormValue("note"),
-				}))
+			return handleErr(c, v.AddCredential(in.Title, *in.Credential))
+		case "file":
+			if in.File == nil {
+				return fiber.NewError(400, "file required")
+			}
+			return handleErr(c, v.AddFile(in.Title, in.File.Filename, in.File.Data))
 		default:
 			return fiber.NewError(400, "unknown record type")
 		}
@@ -186,6 +171,57 @@ func ViewRecordPage() fiber.Handler {
 			"Title":  "View record",
 			"Record": r,
 		}, "layouts/private")
+	}
+}
+
+func EditRecordPage() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		v := c.Locals("vault").(*vault.VaultService)
+		r, err := v.GetRecord(c.Params("id"))
+		if err != nil {
+			return fiber.ErrNotFound
+		}
+
+		return c.Render("record_edit", fiber.Map{
+			"Title":  "Update record",
+			"Record": r,
+		}, "layouts/private")
+	}
+}
+
+func EditRecord() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		v := c.Locals("vault").(*vault.VaultService)
+		id := c.Params("id")
+
+		r, err := v.GetRecord(id)
+		if err != nil {
+			return fiber.ErrNotFound
+		}
+
+		in, err := parseRecordForm(c, r.Type)
+		if err != nil {
+			return err
+		}
+
+		r.Title = in.Title
+		switch in.Type {
+		case "note":
+			r.Note = in.Note
+		case "credential":
+			r.Credential = in.Credential
+		case "file":
+			if in.File != nil {
+				r.File = in.File
+			}
+		}
+
+		if err := v.Save(); err != nil {
+			return err
+		}
+
+		location := fmt.Sprintf("/records/%v", r.ID)
+		return c.Redirect(location)
 	}
 }
 
@@ -272,4 +308,53 @@ func handleErr(c *fiber.Ctx, err error) error {
 		return fiber.NewError(400, err.Error())
 	}
 	return c.Redirect("/records")
+}
+
+func parseRecordForm(c *fiber.Ctx, recordType vault.RecordType) (*RecordInput, error) {
+	in := &RecordInput{
+		Title: c.FormValue("title"),
+		Type:  recordType,
+	}
+
+	switch recordType {
+
+	case "note":
+		in.Note = &vault.NoteData{
+			Text: c.FormValue("text"),
+		}
+
+	case "credential":
+		in.Credential = &vault.CredentialData{
+			Website:  c.FormValue("website"),
+			Username: c.FormValue("username"),
+			Password: c.FormValue("password"),
+			Email:    c.FormValue("email"),
+			Phone:    c.FormValue("phone"),
+			Note:     c.FormValue("note"),
+		}
+
+	case "file":
+		fh, err := c.FormFile("file")
+		if err == nil && fh != nil {
+			f, err := fh.Open()
+			if err != nil {
+				return nil, err
+			}
+			defer f.Close()
+
+			data, err := io.ReadAll(f)
+			if err != nil {
+				return nil, err
+			}
+
+			in.File = &vault.FileData{
+				Filename: fh.Filename,
+				Data:     data,
+			}
+		}
+
+	default:
+		return nil, fiber.NewError(400, "unknown record type")
+	}
+	return in, nil
 }

@@ -94,7 +94,7 @@ func (s *VaultService) List() []*Record {
 	return s.vault.Records
 }
 
-func (s *VaultService) save() error {
+func (s *VaultService) Save() error {
 	raw, err := json.Marshal(s.vault)
 	if err != nil {
 		return err
@@ -136,7 +136,7 @@ func (s *VaultService) AddNote(title, text string) error {
 	}
 
 	s.vault.Records = append(s.vault.Records, r)
-	return s.save()
+	return s.Save()
 }
 
 func (s *VaultService) AddFile(title, filename string, data []byte) error {
@@ -160,7 +160,7 @@ func (s *VaultService) AddFile(title, filename string, data []byte) error {
 	}
 
 	s.vault.Records = append(s.vault.Records, r)
-	return s.save()
+	return s.Save()
 }
 
 func (s *VaultService) AddCredential(title string, c CredentialData) error {
@@ -184,7 +184,7 @@ func (s *VaultService) AddCredential(title string, c CredentialData) error {
 	}
 
 	s.vault.Records = append(s.vault.Records, r)
-	return s.save()
+	return s.Save()
 }
 
 func (s *VaultService) GetRecord(id string) (*Record, error) {
@@ -203,7 +203,7 @@ func (s *VaultService) DeleteRecord(id string) error {
 				s.vault.Records[:i],
 				s.vault.Records[i+1:]...,
 			)
-			return s.save()
+			return s.Save()
 		}
 	}
 	return errors.New("record not found")

@@ -1,0 +1,83 @@
+<div class="add-record">
+    <h2>Edit record</h2>
+
+    <form method="POST" action="/records/{{ .Record.ID }}/edit" enctype="multipart/form-data">
+        <input type="hidden" name="_method" value="PATCH">
+
+        <div>
+            <input name="title" placeholder="Title" required value="{{ .Record.Title }}">
+        </div>
+
+        <div style="margin-top:8px;">
+            <strong>Type:</strong>
+            {{ if eq .Record.Type "note" }}📝 Note{{ end }}
+            {{ if eq .Record.Type "file" }}📁 File{{ end }}
+            {{ if eq .Record.Type "credential" }}🔐 Website access{{ end }}
+            <input type="hidden" name="type" value="{{ .Record.Type }}">
+        </div>
+
+        <div id="note-block" style="margin-top:8px;">
+            <textarea name="text" rows="6" placeholder="Note text">
+                {{ if .Record.Note }}{{ .Record.Note.Text }}{{ end }}
+            </textarea>
+        </div>
+
+        <div id="file-block" style="margin-top:8px;">
+            {{ if .Record.File }}
+            <p>
+                Current file:
+                <strong>{{ .Record.File.Filename }}</strong>
+            </p>
+            <p><small>Upload a new file to replace it</small></p>
+            {{ end }}
+            <input type="file" name="file">
+        </div>
+
+        <div id="cred-block" style="margin-top:8px;">
+            <input name="website"
+                   placeholder="Website URL"
+                   value="{{ if .Record.Credential }}{{ .Record.Credential.Website }}{{ end }}">
+            <br>
+            <input name="username"
+                   placeholder="Username"
+                   value="{{ if .Record.Credential }}{{ .Record.Credential.Username }}{{ end }}">
+            <br>
+            <input name="password"
+                   placeholder="Password"
+                   value="{{ if .Record.Credential }}{{ .Record.Credential.Password }}{{ end }}">
+            <button type="button" onclick="genPass()">Generate</button>
+            <br>
+            <input name="email"
+                   placeholder="Email"
+                   value="{{ if .Record.Credential }}{{ .Record.Credential.Email }}{{ end }}"
+            >
+            <br>
+            <input name="phone"
+                   placeholder="Phone"
+                   value="{{ if .Record.Credential }}{{ .Record.Credential.Phone }}{{ end }}"
+            >
+            <br>
+            <textarea name="note" rows="3" placeholder="Note">{{ if .Record.Credential }}{{ .Record.Credential.Note }}{{ end }}</textarea>
+        </div>
+
+        <div style="margin-top:12px;">
+            <button type="submit">Save</button>
+            <a href="/records">Cancel</a>
+        </div>
+    </form>
+
+    <script>
+        function genPass() {
+            fetch("/records/gen-password")
+                .then(r => r.text())
+                .then(p => document.querySelector('input[name="password"]').value = p)
+        }
+
+        (function () {
+            const t = "{{ .Record.Type }}"
+            document.getElementById("note-block").style.display = t === "note" ? "block" : "none"
+            document.getElementById("file-block").style.display = t === "file" ? "block" : "none"
+            document.getElementById("cred-block").style.display = t === "credential" ? "block" : "none"
+        })()
+    </script>
+</div>
