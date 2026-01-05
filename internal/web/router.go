@@ -8,6 +8,10 @@ import (
 func RegisterRoutes(app *fiber.App, cfg *config.Config) {
 	sm := NewSessionManager(cfg.SessionTTL)
 
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Redirect("/login", fiber.StatusPermanentRedirect)
+	})
+
 	app.Get("/register", RegisterPage())
 	app.Post("/register", Register(cfg.DataStore))
 
